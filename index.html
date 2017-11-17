@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <style>
+      html, body { width: 100%; margin:0; padding:0; }
+      div { font-family: sans-serif; }
+      #controls { position: fixed; bottom: 0; width:100%; height: 75px; border-top:1px solid rgba(225,225,225,0.6); background-color:rgba(200,200,200,0.5); font-size:24px; opacity:0; transition: opacity ease-in-out 0.5s }
+      #controls:hover { opacity: 1; }
+      #overflow { position: absolute; left:50%; display:inline-block; margin-top:20px; }
+      .slide { width:100%; height:100%;}
+      .slide img { width: 100%; height: 100%; }
+      #next, #prev { position: absolute; padding: 3px; display:inline-block; margin-top:20px;}
+      #next { right: 25px; }
+      #prev { left: 25px; display:none; }
+      #next, #prev:hover { cursor: pointer; }
+      #counter { position:fixed; display:block; top:15px; right: 25px; font-size: 24px; }
+      #loader { display:block; position:fixed; width: 100%; top:50%; transform:translateY(-50%); }
+      #loader img { display:block; position:relative; width:25%; margin:0 auto; }
+      .final { height:900px; width: 100%; background-color: #000; }
+    </style>
+  </head>
+  <body>
+    <div id="loader"><img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" /></div>
+    <div id="slides"></div>
+    <div id="counter"></div>
+    <div id="controls">
+      <div id="next" href="#slide2">Next</div>
+      <div id="overflow"><input type="checkbox" value="auto" onclick="allowScroll($(this))">Disable Scroll</input></div>
+      <div id="prev">Previous</div>
+    </div>
+    <script>
+    var n=1;
+
+    // Get the slide elements
+    $(document).ready(function() {
+     google.script.run.withSuccessHandler(parseHtml).getThumbnails();
+    });
+       
+    // Process into full-page divs for the player
+    function parseHtml(data) {
+      for(var i=0; i<data.length; i++) {
+        $("#slides").append("<div class='slide' id='slide" + (i+1) +"'><img src='" + data[i].contentUrl + "' /></div>");
+        $("#loader").css("display", "none");
+      }
+      $("#slides").append("<div class='slide final' id='slide" + (data.length + 1) + "'></div>");
+      $(".final").height(window.height).width(window.width);
+      
+      // Add data to the counter
+      updateCount(n);
+    }
+    
+      // Page actions each time next is clicked
+      $("#next").click(function() {
+      
+        // iterate the counter for the current slide position
+        n = n+1;
+      
+        // Jump to the slide, reset #next link
+        $(window).scrollTop($("#slide" + n).offset().top);
+        $(this).attr("href", "#slide" + (n+1));
+      
+        // Store the number of slides to pass to the counter
+        var slideNum = $(".slide").length;
+        
+        if(!$("#slide" + n).hasClass("posted")) {
+          // get the previous slide image
+          var img = $("#slide" + (n-1)).find("img").attr("src");
+          
+          console.log(img);
+       
+          // send the image to the server for posting to Twitter
+          console.log("posting tweet...");
+          
+          google.script.run.withSuccessHandler(success).postTweet(img);
+          console.log("A tweet will go out");
+      
+          // Add a class so images aren't double-tweeted
+          $("#slide" + n).addClass("posted");
+        }
+        // Update the counter
+        updateCount(n);
+      
+        // Remove the "next" button if at the end of the show
+        if(n >= slideNum) { $("#next").css("display", "none"); }
+        if(n > 1) { $("#prev").css("display", "block"); }
+    })
+    
+    $("#prev").click(function() {
+      // update the counter
+      n = n-1;
+      updateCount(n);
+      
+      // check to enable "prev" button
+      console.log(n == 1);
+      if(n == 1) { $(this).css("display", "none") }
+      
+      // Store the number of slides to pass to the counter
+      var slideNum = $(".slide").length;
+      
+      // Show the Next button if it's hidden
+      if(n < slideNum) { $("#next").css("display", "block"); }
+      
+      // Update the link for scrolling backward
+      $(window).scrollTop($("#slide" + n).offset().top);
+      $(this).attr("href", "#slide" + (n-1));
+    })
+    
+    function updateCount(n) {
+      $("#counter").html( "<p>" + n + " / " + $(".slide").length + "</p>");
+    }
+    
+    function success(e) {
+      console.log("Success! https://www.twitter.com/" + e.user.screen_name + "/status/" + e.id);
+    }
+    
+    function allowScroll(e) {
+      console.log("Scrolling enabled")
+      console.log(e.is(":checked"));
+      if(e.is(":checked")) {
+        $("body").css("overflow", "hidden");
+      } else {
+        $("body").css("overflow", "auto");
+      }
+    }
+    
+    </script>
+  </body>
+</html>
