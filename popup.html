@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+    <base target="_top">
+  </head>
+  <body>
+    <h3>Thanks for using Slide Tweeter.</h3>
+    <p>In order to Tweet your slides, you'll need to launch the custom player in a new window.</p>
+    
+    <form>
+      <label>Hashtag to append:</label>
+      <input type="text" name="hashtag" value="<?!= getProps(); ?>" />
+      <br />
+      <br />
+      <input type="button" value="Launch Player" class="action" onclick="google.script.run.withSuccessHandler(openPage).getUrl(this.parentNode)" />
+    </form>
+    
+    <script>
+      function openPage(obj) {
+      console.log(obj);
+        var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes";
+        window.open(obj.url, obj.title, strWindowFeatures);
+      }
+    </script>
+  </body>
+</html>
+
+

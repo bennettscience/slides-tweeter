@@ -1,7 +1,10 @@
-var KEY = "KEY";
-var SECRET = "SECRET";
+function disconnect() {
+  TwtrService.disconnectTwitter();
+}
 
-// Initialize Twitter login
+/**
+* Launches key/secret and auth flow
+*/
 function setup() {
   if (TwtrService.isUserConnectedToTwitter()){
    var result = Browser.msgBox("Twitter Authorisation",
@@ -31,9 +34,42 @@ function checkKeys() {
   Logger.log("Secret: " + TwtrService.getUserSecret());
 }
 
+
+// Add the menu item to the Slides Editor
+function onOpen() {
+  var ui = SlidesApp.getUi()
+    .createMenu("Slide Tweeter").addItem("Launch", "openPlayer").addToUi();
+}
+
+// Get the stored hashtag for the presentation
+function getProps() {
+  return PropertiesService.getDocumentProperties().getProperty('tag');
+}
+
+// Return the URL and title of the published webapp
+function getUrl(formObject) {
+  var prop = { "tag": formObject.hashtag };
+  
+  PropertiesService.getDocumentProperties().setProperties(prop, true);
+  var obj = {};
+  obj.url = ScriptApp.getService().getUrl();
+  obj.title = SlidesApp.getActivePresentation().getName();
+  return obj;
+}
+
+// Engage a user interaction to open the custom player in a new tab
+function openPlayer() {
+  if(TwtrService.isUserConnectedToTwitter()) {
+    var html = HtmlService.createTemplateFromFile('popup').evaluate();
+    SlidesApp.getUi().showModelessDialog(html, "Slide Tweeter");  
+  } else {
+    setup(SlidesApp);
+  }
+}
+
 // Serve HTML for the custom presentation page
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('index');
+function doGet(e) {
+  return HtmlService.createHtmlOutputFromFile('index').setHeight(700).setWidth(1600).setTitle(SlidesApp.getActivePresentation().getName()).setSandboxMode(HtmlService.SandboxMode.NATIVE);
 }
 
 
@@ -71,10 +107,11 @@ function postTweet(img) {
   // Don't use TwtrService, fetch directly to Twitter
   //var res = UrlFetchApp.fetch(baseUrl, options);
   var res = TwtrService.upload('media/upload', params);
+  Logger.log(res);
 
   if(res) {
     Logger.log("Upload successful: " + res.media_id);
-    var status = "How long will this take?";
+    var status = PropertiesService.getDocumentProperties().getProperty('tag');
     try {
       Logger.log("Posting tweet with media");
       var response = TwtrService.post('statuses/update', { status: status, media_ids: res.media_id_string });
@@ -87,3 +124,17 @@ function postTweet(img) {
     }
   }
 } 
+
+function testTweetSpeed() {
+  var status = "How fast will this go?";
+  var base = 'statuses/update';
+
+  try {
+    var res = TwtrService.post('statuses/update', { status: status });
+    if(res) {
+      Logger.log(res);
+    }
+  } catch(e) {
+    Logger.log(e.toString())
+  }
+}

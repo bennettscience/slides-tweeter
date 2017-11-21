@@ -19,6 +19,7 @@
       #loader { display:block; position:fixed; width: 100%; top:50%; transform:translateY(-50%); }
       #loader img { display:block; position:relative; width:25%; margin:0 auto; }
       .final { height:900px; width: 100%; background-color: #000; }
+      .final #toast { width:50%; font-size:36px; color: #fff; margin: 0 auto; position:relative; top:50%; }
     </style>
   </head>
   <body>
@@ -31,6 +32,7 @@
       <div id="prev">Previous</div>
     </div>
     <script>
+    
     var n=1;
 
     // Get the slide elements
@@ -42,9 +44,10 @@
     function parseHtml(data) {
       for(var i=0; i<data.length; i++) {
         $("#slides").append("<div class='slide' id='slide" + (i+1) +"'><img src='" + data[i].contentUrl + "' /></div>");
-        $("#loader").css("display", "none");
       }
-      $("#slides").append("<div class='slide final' id='slide" + (data.length + 1) + "'></div>");
+      
+      $("#loader").css("display","none");
+      $("#slides").append("<div class='slide final' id='slide" + (data.length + 1) + "'><div id='toast'><p>Presented using the Slides Tweeter AddOn</p></div></div>");
       $(".final").height(window.height).width(window.width);
       
       // Add data to the counter
@@ -67,17 +70,13 @@
         if(!$("#slide" + n).hasClass("posted")) {
           // get the previous slide image
           var img = $("#slide" + (n-1)).find("img").attr("src");
-          
-          console.log(img);
        
           // send the image to the server for posting to Twitter
-          console.log("posting tweet...");
-          
+          console.log("posting tweet");
           google.script.run.withSuccessHandler(success).postTweet(img);
-          console.log("A tweet will go out");
       
           // Add a class so images aren't double-tweeted
-          $("#slide" + n).addClass("posted");
+          $("#slide" + (n-1)).addClass("posted");
         }
         // Update the counter
         updateCount(n);
@@ -112,7 +111,7 @@
     }
     
     function success(e) {
-      console.log("Success! https://www.twitter.com/" + e.user.screen_name + "/status/" + e.id);
+      console.log("Success!");
     }
     
     function allowScroll(e) {
