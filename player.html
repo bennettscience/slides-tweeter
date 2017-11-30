@@ -37,7 +37,7 @@
 
     // Get the slide elements
     $(document).ready(function() {
-     google.script.run.withSuccessHandler(parseHtml).getThumbnails();
+      google.script.run.withSuccessHandler(parseHtml).getThumbnails();
     });
        
     // Process into full-page divs for the player
@@ -68,8 +68,11 @@
         var slideNum = $(".slide").length;
         
         if(!$("#slide" + n).hasClass("posted")) {
+          
           // get the previous slide image
-          var img = $("#slide" + (n-1)).find("img").attr("src");
+          var img = $("#slide" + (n-1)).find("img").attr("src").slice(0,-4) + '500';
+          
+          console.log(img);
        
           // send the image to the server for posting to Twitter
           console.log("posting tweet");

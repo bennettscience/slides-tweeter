@@ -38,7 +38,7 @@ function checkKeys() {
 // Add the menu item to the Slides Editor
 function onOpen() {
   var ui = SlidesApp.getUi()
-    .createMenu("Slide Tweeter").addItem("Launch", "openPlayer").addToUi();
+    .createAddonMenu().addItem("Launch", "openPlayer").addToUi();
 }
 
 // Get the stored hashtag for the presentation
@@ -48,13 +48,19 @@ function getProps() {
 
 // Return the URL and title of the published webapp
 function getUrl(formObject) {
-  var prop = { "tag": formObject.hashtag };
+  var props = { "tag": formObject.hashtag, "id": formObject.id };
   
-  PropertiesService.getDocumentProperties().setProperties(prop, true);
+  Logger.log(props);
+  
+  PropertiesService.getScriptProperties().setProperties(props, true);
   var obj = {};
-  obj.url = ScriptApp.getService().getUrl();
-  obj.title = SlidesApp.getActivePresentation().getName();
-  return obj;
+    obj.url = "Public Key Here";
+    obj.title = formObject.title;
+    return obj;
+}
+
+function checkProps() {
+  Logger.log(PropertiesService.getScriptProperties().getProperties());
 }
 
 // Engage a user interaction to open the custom player in a new tab
@@ -69,7 +75,8 @@ function openPlayer() {
 
 // Serve HTML for the custom presentation page
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('index').setHeight(700).setWidth(1600).setTitle(SlidesApp.getActivePresentation().getName()).setSandboxMode(HtmlService.SandboxMode.NATIVE);
+  Logger.log(e);
+  return HtmlService.createHtmlOutputFromFile('player').setHeight(700).setWidth(1600).setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
 
@@ -78,8 +85,8 @@ function doGet(e) {
 
 function getThumbnails() {
   var thumbs = [];
-  var id = SlidesApp.getActivePresentation().getId();
-  var slides = SlidesApp.getActivePresentation().getSlides();
+  var id = PropertiesService.getScriptProperties().getProperty("id");
+  var slides = SlidesApp.openById(id).getSlides();
   
   for(var i=0; i<slides.length; i++) {
     var objID = slides[i].getObjectId();
@@ -111,7 +118,7 @@ function postTweet(img) {
 
   if(res) {
     Logger.log("Upload successful: " + res.media_id);
-    var status = PropertiesService.getDocumentProperties().getProperty('tag');
+    var status = PropertiesService.getScriptProperties().getProperty('tag');
     try {
       Logger.log("Posting tweet with media");
       var response = TwtrService.post('statuses/update', { status: status, media_ids: res.media_id_string });
