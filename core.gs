@@ -13,10 +13,10 @@ function setup() {
     // Process the user's response.
     if (result == 'yes') {
       // User clicked "Yes".
-      TwtrService.showTwitterKeySecret(SlidesApp);
+      showTwitterKeySecret(SlidesApp);
     }
   } else {
-    TwtrService.showTwitterKeySecret(SlidesApp);
+    showTwitterKeySecret(SlidesApp);
   }
 }
  
@@ -26,6 +26,7 @@ function setup() {
 function processForm(formObject) {
   TwtrService.setUserKeySecret(formObject);
   TwtrService.showTwitterLogin(SlidesApp);
+  SlidesApp.getUi().createAddonMenu().addItem("Launch Player", "openPlayer").addItem("Disconnect Account" , "disconnect").addToUi();
 }
 
 function checkKeys() {
@@ -34,11 +35,18 @@ function checkKeys() {
   Logger.log("Secret: " + TwtrService.getUserSecret());
 }
 
+function onInstall(e) {
+  onOpen(e)
+}
+
 
 // Add the menu item to the Slides Editor
-function onOpen() {
-  var ui = SlidesApp.getUi()
-    .createAddonMenu().addItem("Launch", "openPlayer").addToUi();
+function onOpen(e) {
+  if(TwtrService.isUserConnectedToTwitter()) {
+    SlidesApp.getUi().createAddonMenu().addItem("Launch Player", "openPlayer").addItem("Disconnect Account" , "disconnect").addToUi();
+  } else {
+    SlidesApp.getUi().createAddonMenu().addItem("Connect Account", "setup").addToUi();
+  }
 }
 
 // Get the stored hashtag for the presentation
@@ -67,7 +75,7 @@ function checkProps() {
 function openPlayer() {
   if(TwtrService.isUserConnectedToTwitter()) {
     var html = HtmlService.createTemplateFromFile('popup').evaluate();
-    SlidesApp.getUi().showModelessDialog(html, "Slide Tweeter");  
+    SlidesApp.getUi().showModelessDialog(html, "Slide Tweeter Settings");  
   } else {
     setup(SlidesApp);
   }

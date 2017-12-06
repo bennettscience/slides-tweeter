@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+<style>
+input[type=text] {
+display:block;
+width:90%;
+margin-bottom:10px;
+}
+</style>
+<div style="margin-bottom:10px;">
+	<form id="myForm" action="https://script.google.com/macros/s/AKfycbyczOKb0_wl3y2cmvAHmL5hpaiXuRZHsOgInZIClCk/exec">
+		<div class="info">
+            <h2>Thanks for choosing Slide Tweeter</h2>
+			<p>This Google Slides Addon will post images of your slides as you move through a presentation.</p>
+			<p>Click <b>Next</b> to sign into Twitter and authorize the AddOn.</p>
+		</div>
+		<div class="group">      
+			<input name="consumerKey" id="consumerKey" type="hidden" value="YOUR_PUBLIC_KEY" />
+			<span class="highlight"></span>
+			<span class="bar"></span>
+		</div>
+		<div class="group">
+			<input name="consumerSecret" id="consumerSecret" type="hidden" value="YOUR_PUBLIC_SECRET" />
+			<span class="highlight"></span>
+			<span class="bar"></span>
+		</div>
+		<input type="button" value="Next" class="action"
+			onclick="google.script.run.processForm(this.parentNode);this.disabled = true; console.log(this.parentNode)" />
+	</form>
+</div>
