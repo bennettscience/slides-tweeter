@@ -15,7 +15,6 @@
 /* This code was orignally developed by Arun Nagarajan https://plus.google.com/+ArunNagarajan/ 
 *  and extended by Martin Hawksey https://plus.google.com/+MartinHawksey 
 */
-
 var consumer = { consumerKey    : getStaticUserProperty_('consumerKey') || null, 
                  consumerSecret : getStaticUserProperty_('consumerSecret') || null, 
                  serviceProvider: { signatureMethod     : "HMAC-SHA1",
